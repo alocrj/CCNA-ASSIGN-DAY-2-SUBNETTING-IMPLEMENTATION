@@ -66,6 +66,7 @@ conf t
 int e0/0
 no shut
 ip add DHCP
+end
 do bp
 
 
@@ -80,11 +81,11 @@ name BPI.COM.PH
 exit
 interface vlan 3
 no shut
-ip add 10.0.32.1 255.255.255.224
+ip add 10.0.32.1 255.255.224.0
 exit
 ip dhcp excluded-add 10.0.32.1 10.0.32.100
 ip dhcp pool BPI.COM.PH
-network 10.0.32.0 255.255.255.224
+network 10.0.32.0 255.255.224.0
 default-router 10.0.32.1
 end
 
@@ -93,8 +94,10 @@ end
 
 conf t
 int e1/0
+no shut
 switchport mode access
 switchport access vlan 3
+end
 
 @P2
 
@@ -111,31 +114,23 @@ do bp
 
 conf t
 vlan 4
-name PSBANK VPN
+name PSBANK-VPN
 exit
 interface vlan 4
 no shut
-ip add 172.16.0.9 255.255.248.0
+ip add 172.16.0.9 255.255.255.248
 exit
 ip dhcp excluded-add 172.16.0.9 
-ip dhcp pool PSBANK VPN
-network 172.16.0.8 255.255.248.0
+ip dhcp pool PSBANK-VPN
+network 172.16.0.8 255.255.255.248
 default-router 172.16.0.9
 end
 
 @D2
 conf t
-vlan 4
-name PSBANK VPN
-exit
-interface vlan 4
-no shut
-ip add 172.16.0.9 255.255.248.0
-exit
-ip dhcp excluded-add 172.16.0.9 
-ip dhcp pool PSBANK VPN
-network 172.16.0.8 255.255.248.0
-default-router 172.16.0.9
+int e1/0
+switchport mode access
+switchport access vlan 4
 end
 
 @S2

@@ -1,3 +1,5 @@
+VLAN + DHCP Network Design and Implementation (Subnetting Lab)
+
 BDO
 [D1, A1, P1]
 172.16.0.0/16
@@ -16,10 +18,48 @@ Last: 172.16.0.62
 Broadcast: 172.16.0.63 255.255.255.224
 Not yours: 172.16.0.64
 
+***********Implement****************
+BDO
+@D1
 
+conf t
+vlan 2
+name BDO VPN
+exit
+interface vlan 2
+no shut
+ip add 172.16.0.33 255.255.255.224
+exit
+ip dhcp excluded-address 172.16.0.33 172.16.0.37
+ip dhcp pool BDO-VPN
+network 172.16.0.32 255.255.255.224
+default-router 172.16.0.33
+end
+
+
+@A1
+
+conf t
+int e0/0
+switchport mode access
+switchport access vlan 2
+no shut
+
+@P1
+
+conf t
+int e0/0
+no shut
+ip address dhcp
+do bp
+
+
+
+
+********** BPI
 BPI
 [D2, A2, P2]
-172.16.0.0/16
+10.0.0.0/8
 5000 EMPLOYEE
 VLAN 3
 name BPI.COM.PH
@@ -30,60 +70,21 @@ S:/32 - 3bits = /19
 I: 3rd, 32i
 
 Network: 10.0.32.0
-1st: 10.0.32.1 255.255.255.224
+1st: 10.0.32.1 255.255.224.0
 Last: 10.0.63.255
-Broadcast: 10.0.64.0 255.255.255.224
+Broadcast: 10.0.64.0 255.255.224.0
 
-***********Implement****************
-BDO
-@D1
-
-conf t
-vlan 2
-name BDO-VPN
-exit
-interface vlan 2
-no shut
-ip add 172.16.0.33 255.255.255.224
-exit
-ip dhcp excluded-add 172.16.0.33 172.16.0.37
-ip dhcp pool BDO-VPN
-network 172.168.0.32 255.255.255.224
-default-router 172.168.0.33
-end
-
-
-@A1
-
-conf t
-int e0/0
-switchport mode access
-switchport access vlan 2
-
-@P1
-
-conf t
-int e0/0
-no shut
-ip add DHCP
-end
-do bp
-
-
-
-
-********** BPI
 @D2
 
 conf t
 vlan 3
-name BPI.COM.PH
+name BPI-VLAN
 exit
 interface vlan 3
 no shut
 ip add 10.0.32.1 255.255.224.0
 exit
-ip dhcp excluded-add 10.0.32.1 10.0.32.100
+ip dhcp excluded-address 10.0.32.1 10.0.32.100
 ip dhcp pool BPI.COM.PH
 network 10.0.32.0 255.255.224.0
 default-router 10.0.32.1
@@ -94,33 +95,47 @@ end
 
 conf t
 int e1/0
-no shut
 switchport mode access
 switchport access vlan 3
-end
 
 @P2
 
 conf t
 int e1/0
 no shut
-ip add DHCP
+ip address dhcp
 do bp
 
 
 **************** PSBANK
+PSBANK
+[D2, D2, S2]
+172.16.0.0/16
+6 WFH
+VLAN 4
+name PSBANK VPN
+
+C: 3bits
+S:/32 - 3bits = /19
+I: 4th, 8i
+
+Network: 172.16.0.8 255.255.255.248
+1st: 172.16.0.9 255.255.255.248
+Last: 172.16.0.15 255.255.255.248
+Broadcast: 172.16.0.16 255.255.255.248
+
 
 @D1
 
 conf t
 vlan 4
-name PSBANK-VPN
+name PSBANK VPN
 exit
 interface vlan 4
 no shut
 ip add 172.16.0.9 255.255.255.248
 exit
-ip dhcp excluded-add 172.16.0.9 
+ip dhcp excluded-address 172.16.0.9 
 ip dhcp pool PSBANK-VPN
 network 172.16.0.8 255.255.255.248
 default-router 172.16.0.9
@@ -131,13 +146,14 @@ conf t
 int e1/0
 switchport mode access
 switchport access vlan 4
-end
+no shut
+
 
 @S2
 
 conf t
 int e1/0
 no shut
-ip add DHCP
+ip address dhcp
 do bp
 

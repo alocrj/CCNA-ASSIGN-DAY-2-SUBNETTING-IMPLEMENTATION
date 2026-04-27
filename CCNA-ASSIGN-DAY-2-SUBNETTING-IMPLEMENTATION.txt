@@ -1,0 +1,148 @@
+BDO
+[D1, A1, P1]
+172.16.0.0/16
+25 WFH
+VLAN 2
+name BDO-VLAN
+
+
+C: 5bits
+S:/32 - 5bits = /27
+I: 4th, 32i
+
+Network: 172.16.0.32
+1st: 172.16.0.33
+Last: 172.16.0.62
+Broadcast: 172.16.0.63 255.255.255.224
+Not yours: 172.16.0.64
+
+
+BPI
+[D2, A2, P2]
+172.16.0.0/16
+5000 EMPLOYEE
+VLAN 3
+name BPI.COM.PH
+
+
+C: 3bits
+S:/32 - 3bits = /19
+I: 3rd, 32i
+
+Network: 10.0.32.0
+1st: 10.0.32.1 255.255.255.224
+Last: 10.0.63.255
+Broadcast: 10.0.64.0 255.255.255.224
+
+***********Implement****************
+BDO
+@D1
+
+conf t
+vlan 2
+name BDO-VPN
+exit
+interface vlan 2
+no shut
+ip add 172.16.0.33 255.255.255.224
+exit
+ip dhcp excluded-add 172.16.0.33 172.16.0.37
+ip dhcp pool BDO-VPN
+network 172.168.0.32 255.255.255.224
+default-router 172.168.0.33
+end
+
+
+@A1
+
+conf t
+int e0/0
+switchport mode access
+switchport access vlan 2
+
+@P1
+
+conf t
+int e0/0
+no shut
+ip add DHCP
+do bp
+
+
+
+
+********** BPI
+@D2
+
+conf t
+vlan 3
+name BPI.COM.PH
+exit
+interface vlan 3
+no shut
+ip add 10.0.32.1 255.255.255.224
+exit
+ip dhcp excluded-add 10.0.32.1 10.0.32.100
+ip dhcp pool BPI.COM.PH
+network 10.0.32.0 255.255.255.224
+default-router 10.0.32.1
+end
+
+
+@A2
+
+conf t
+int e1/0
+switchport mode access
+switchport access vlan 3
+
+@P2
+
+conf t
+int e1/0
+no shut
+ip add DHCP
+do bp
+
+
+**************** PSBANK
+
+@D1
+
+conf t
+vlan 4
+name PSBANK VPN
+exit
+interface vlan 4
+no shut
+ip add 172.16.0.9 255.255.248.0
+exit
+ip dhcp excluded-add 172.16.0.9 
+ip dhcp pool PSBANK VPN
+network 172.16.0.8 255.255.248.0
+default-router 172.16.0.9
+end
+
+@D2
+conf t
+vlan 4
+name PSBANK VPN
+exit
+interface vlan 4
+no shut
+ip add 172.16.0.9 255.255.248.0
+exit
+ip dhcp excluded-add 172.16.0.9 
+ip dhcp pool PSBANK VPN
+network 172.16.0.8 255.255.248.0
+default-router 172.16.0.9
+end
+
+@S2
+
+conf t
+int e1/0
+no shut
+ip add DHCP
+do bp
+
